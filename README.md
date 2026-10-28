@@ -4,6 +4,8 @@
 
 当前版本：**0.7.0**。资源调度沿用0.6.1的规则，本版重点改进按钮视觉状态、交互动画、切页和操作体验，并补齐项目文档。
 
+**下载安装包：** [完整一键安装包（包含加载器和运行时）](https://github.com/dfggsfs/MoonSweepers-QuantumTransport/releases/download/v0.7.0/QuantumTransport-0.7.0-OneClick.zip) · [仅插件包](https://github.com/dfggsfs/MoonSweepers-QuantumTransport/releases/download/v0.7.0/QuantumTransport-0.7.0.zip) · [发布说明与 SHA-256 校验文件](https://github.com/dfggsfs/MoonSweepers-QuantumTransport/releases/tag/v0.7.0)。普通玩家优先下载完整一键包；GitHub 的 `Code → Download ZIP` 和 Release 中的 `Source code` 为源码压缩包，不能直接安装。
+
 > 本项目是玩家 Mod，与游戏开发商没有从属关系。实现和离线检查已完成的部分、玩家已验证的部分，以及尚待实机验证的部分，在本文中分别说明。
 
 ## 1. 能做什么
