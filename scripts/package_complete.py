@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parent.parent
 VERSION = ET.parse(ROOT/'src/QuantumTransport.Mod/QuantumTransport.Mod.csproj').findtext('.//Version')
+COMPATIBILITY = json.loads((ROOT/'distribution/game-compatibility.json').read_text(encoding='utf-8'))
 NAME = f'QuantumTransport-{VERSION}-OneClick'
 ZIP_NAME = NAME + '.zip'
 OUT = ROOT / 'dist' / NAME
@@ -66,6 +67,9 @@ copy(LOADER, 'payload/lustral-win-x64-il2cpp-0.1.0.zip')
 for file in ['QuantumTransport.dll', 'QuantumTransport.Core.dll', 'mod.toml']:
     copy(release / 'Mods/local.quantumtransport' / file, 'payload/Mods/local.quantumtransport/' + file)
 copy(ROOT / 'distribution/default-config.toml', 'defaults/local.quantumtransport.toml')
+copy(ROOT / 'distribution/game-compatibility.json', 'game-compatibility.json')
+copy(ROOT / 'scripts/Inspect-GameVersion.ps1', 'scripts/Inspect-GameVersion.ps1')
+write('诊断游戏版本.cmd', '@echo off\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\\Inspect-GameVersion.ps1"\r\npause\r\n', 'ascii')
 write('defaults/loader.toml', '[log]\nlevel = "info"\nconsole = false\n\n[updates]\nmode = "off"\n')
 
 for title, args in [('一键安装.cmd', ''), ('安装前检查.cmd', ' -CheckOnly')]:
@@ -76,6 +80,7 @@ for title, args in [('一键安装.cmd', ''), ('安装前检查.cmd', ' -CheckOn
 
 copy(ROOT / 'distribution/完整安装说明.md', '先看这里-安装说明.md')
 write('README.md',(ROOT/'README.md').read_text(encoding='utf-8-sig').replace('docs/images/','preview/'))
+copy(ROOT/f'docs/compatibility-{VERSION}.md', f'docs/compatibility-{VERSION}.md')
 details = (ROOT / 'distribution/开始测试.md').read_text(encoding='utf-8-sig')
 details = details.replace('其他电脑也需要对应游戏与 Lustral；ZIP 不含游戏、加载器、存档或备份。',
                           '本完整包已内置 Lustral 和运行时，其他电脑无需另装；首次接口补全可能需要联网。ZIP 不含游戏文件、个人存档或备份。')
@@ -139,12 +144,10 @@ files = [{'path': p.relative_to(OUT).as_posix(), 'sha256': sha(p.read_bytes()), 
          for p in sorted(OUT.rglob('*')) if p.is_file()]
 manifest = {
     'format': 1, 'installerRevision': 2, 'modVersion': VERSION, 'loaderVersion': '0.1.0', 'platform': 'win-x64',
-    'gameFiles': [
-        {'path': 'GameAssembly.dll', 'sha256': '82b2e7f2a049c332e836fd9b492ce2fa16c1600de1d276b4b79742daf15adea0'},
-        {'path': 'MoonSweepers_Data/il2cpp_data/Metadata/global-metadata.dat', 'sha256': 'f5ac72f32a8d9f5992ec793265b6dec0092a7358c342194fd0afb4e193119c1b'}],
+    'gameBuildId': COMPATIBILITY['steamBuildId'],
+    'gameFiles': COMPATIBILITY['gameFiles'],
     # XxHash128 values used by Lustral's own cache manifest for these exact SHA-pinned inputs.
-    'interop': {'Format': 7, 'UnityVersion': '6000.6.0f1', 'Il2CppInteropVersion': '2.0.0-beta.8',
-                'GameAssemblyHash': '705b11ce64a803e1ff396418db440649', 'MetadataHash': '05b586e0de617989339d2635dc64830f'},
+    'interop': COMPATIBILITY['interop'],
     'files': files, 'loaderFiles': loader_files, 'modFiles': mod_files,
     'scope': 'Loader/runtime and Mod installation only; static local interface generation; no game execution or gameplay validation.'}
 write('bundle-manifest.json', json.dumps(manifest, ensure_ascii=False, indent=2), 'utf-8')

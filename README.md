@@ -2,9 +2,9 @@
 
 为 **Moon Sweepers** 提供全图、按需、保留资源归属的量子物流，以及游戏内运输控制台。
 
-当前版本：**0.7.0**。资源调度沿用0.6.1的规则，本版重点改进按钮视觉状态、交互动画、切页和操作体验，并补齐项目文档。
+当前版本：**0.7.1**。本版适配 Steam Build 26264480，重新生成并检查游戏接口，统一游戏指纹配置，并改进安装失败诊断；物流和面板交互沿用0.7.0。
 
-**下载安装包：** [完整一键安装包（包含加载器和运行时）](https://github.com/dfggsfs/MoonSweepers-QuantumTransport/releases/download/v0.7.0/QuantumTransport-0.7.0-OneClick.zip) · [仅插件包](https://github.com/dfggsfs/MoonSweepers-QuantumTransport/releases/download/v0.7.0/QuantumTransport-0.7.0.zip) · [发布说明与 SHA-256 校验文件](https://github.com/dfggsfs/MoonSweepers-QuantumTransport/releases/tag/v0.7.0)。普通玩家优先下载完整一键包；GitHub 的 `Code → Download ZIP` 和 Release 中的 `Source code` 为源码压缩包，不能直接安装。
+**下载安装包：** [完整一键安装包（包含加载器和运行时）](https://github.com/dfggsfs/MoonSweepers-QuantumTransport/releases/download/v0.7.1/QuantumTransport-0.7.1-OneClick.zip) · [仅插件包](https://github.com/dfggsfs/MoonSweepers-QuantumTransport/releases/download/v0.7.1/QuantumTransport-0.7.1.zip) · [发布说明与 SHA-256 校验文件](https://github.com/dfggsfs/MoonSweepers-QuantumTransport/releases/tag/v0.7.1)。普通玩家优先下载完整一键包；GitHub 的 `Code → Download ZIP` 和 Release 中的 `Source code` 为源码压缩包，不能直接安装。
 
 > 本项目是玩家 Mod，与游戏开发商没有从属关系。实现和离线检查已完成的部分、玩家已验证的部分，以及尚待实机验证的部分，在本文中分别说明。
 
@@ -30,7 +30,7 @@
 | 项目 | 当前固定适配 |
 | --- | --- |
 | 操作系统 | Windows x64 |
-| 游戏 | Moon Sweepers 1.0.4，Steam Build 26203101 |
+| 游戏 | Moon Sweepers，Steam Build 26264480 |
 | Unity | 6000.6.0f1，IL2CPP，metadata v108 |
 | 加载器 | Lustral 0.1.0，Windows x64 / IL2CPP |
 | 完整包运行时 | 上游加载器自带的 .NET 运行时，无需玩家另装 SDK |
@@ -38,12 +38,14 @@
 
 安装器和运行时均检查游戏核心文件指纹。游戏更新后即使版本显示相近，指纹不匹配也会停止，不能承诺跨构建兼容。
 
+0.7.1适配Build **26264480**；0.7.0适配的旧构建是26203101。安装时提示文件缺失，应先检查游戏文件完整性；提示指纹不匹配时会显示支持构建、Steam记录构建及双方哈希。可双击包内“诊断游戏版本.cmd”，把桌面生成的 `QuantumTransport-GameVersion-*.json` 提供给维护者。该工具只读构建记录和指纹，不读取存档、不启动游戏、不上传；不能仅修改清单绕过适配检查。
+
 ```text
 GameAssembly.dll
-82b2e7f2a049c332e836fd9b492ce2fa16c1600de1d276b4b79742daf15adea0
+c5294c11e1ffb4eda7b2f003aa1e6beaa01f59989bedee2694804b031d6d84ba
 
 MoonSweepers_Data/il2cpp_data/Metadata/global-metadata.dat
-f5ac72f32a8d9f5992ec793265b6dec0092a7358c342194fd0afb4e193119c1b
+e685e404560264cb17c491ebcf515a4c56b366871c9994a5bc35bcdbdb0f17d5
 ```
 
 ## 3. 安装、升级与停用
@@ -51,8 +53,8 @@ f5ac72f32a8d9f5992ec793265b6dec0092a7358c342194fd0afb4e193119c1b
 ### 完整一键包：推荐给玩家
 
 1. 在游戏内保存并正常关闭游戏。
-2. 解压 `QuantumTransport-0.7.0-OneClick.zip`。
-3. 将整个 `QuantumTransport-0.7.0-OneClick` 文件夹放到游戏目录，与 `MoonSweepers.exe` 并列。
+2. 解压 `QuantumTransport-0.7.1-OneClick.zip`。
+3. 将整个 `QuantumTransport-0.7.1-OneClick` 文件夹放到游戏目录，与 `MoonSweepers.exe` 并列。
 4. 双击文件夹内的 `一键安装.cmd`，需要写入管理员目录时按Windows提示授权。
 5. 等待“安装成功”，再从Steam正常启动。
 
@@ -61,7 +63,7 @@ Moon Sweepers/
 ├─ MoonSweepers.exe
 ├─ GameAssembly.dll
 ├─ MoonSweepers_Data/
-└─ QuantumTransport-0.7.0-OneClick/
+└─ QuantumTransport-0.7.1-OneClick/
    ├─ 一键安装.cmd
    ├─ 安装前检查.cmd
    ├─ README.md
@@ -88,7 +90,7 @@ Moon Sweepers/
 
 ### 已有加载器的插件包
 
-`QuantumTransport-0.7.0.zip`仅含插件、配置模板、安装脚本和说明，需要先有匹配的Lustral及游戏接口。普通玩家优先使用完整一键包。
+`QuantumTransport-0.7.1.zip`仅含插件、配置模板、安装脚本和说明，需要先有匹配的Lustral及游戏接口。普通玩家优先使用完整一键包。
 
 ### 停用与回退
 
@@ -363,7 +365,7 @@ dist/                           声明清单生成的发布包
 
 工程需要本机匹配的游戏与已生成interop、加载器核心DLL，以及对应SDK/开发工具。游戏和生成的接口不能从普通源码文本中重建，也未作为玩家包直接分发。
 
-默认工程引用和AssemblyInspector使用默认Steam安装路径。`QuantumTransport.Mod.csproj`支持 `GameDir` 属性覆盖编译引用；完整检查工具中的游戏路径仍需同步调整。此开发路径限制与完整版安装器从父目录识别任意盘符是两回事。
+默认工程引用使用默认Steam安装路径。`scripts/Build.ps1`支持 `-GameDir` 和 `-InteropDir`，可在独立目录生成新接口后完成编译和反射检查；AssemblyInspector支持 `--game`、`--interop`。适配指纹以 `distribution/game-compatibility.json` 为唯一配置来源：Core程序集内嵌同一份配置，打包器、运行前检查和诊断工具也使用它。
 
 在项目根目录运行：
 
@@ -394,6 +396,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tests/Test-InstallerLongPath
 
 ### 覆盖范围
 
+0.7.1针对Build 26264480完成：核心237,867项断言、接口与配置181项检查、安装器82项检查；编译零警告、零错误。兼容修订说明见 [docs/compatibility-0.7.1.md](docs/compatibility-0.7.1.md)。这些结果均未启动游戏。
+
 - 核心回归：容量、公平分配、配方/保留量、质量守恒、故障回滚、站点贡献、来源身份、轮询、联机权限、交接/重试/编号区间。
 - UI回归：菜单重复释放/重入、禁用分页、所有按钮提示、主题对比度、颜色插值、不同帧步长、切页阶段、减少动态效果和开合中断。
 - 接口检查：实际生成程序集中的契约、实际加载器配置迁移/保存、只保留既有网络钩子、编译IL禁止退出调用、按钮不再使用玻璃控件。
@@ -402,7 +406,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tests/Test-InstallerLongPath
 
 ### 实机验证边界
 
-玩家此前明确验证过打包机→加压舱→压石机、多机分配与拆除，随后反馈0.6.1的面板修复完成度较高。不能据此宣称所有采集工具、车库、双人联机和异常恢复情形都已完成逐项验收。**0.7.0新增颜色、动画和输入体验需玩家实测**，离线预览和通过的断言不是实际游戏操作录像。
+玩家此前明确验证过打包机→加压舱→压石机、多机分配与拆除，随后反馈0.6.1的面板修复完成度较高。不能据此宣称所有采集工具、车库、双人联机和异常恢复情形都已完成逐项验收。**0.7.0引入的颜色、动画和输入体验，以及0.7.1在新游戏构建上的行为需玩家实测**，离线预览和通过的断言不是实际游戏操作录像。
 
 建议复测：连续切三页、快速翻页、首尾禁用、鼠标与键盘切换、点击总开关、开合中按Esc、原本已开暂停菜单时打开、保存/场景切换、不同分辨率、减少动态效果，以及原有采集加工链。关闭面板后应恢复原界面，关闭运输后应保留现有资源。
 
@@ -419,6 +423,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tests/Test-InstallerLongPath
 
 | 版本 | 主要变化 |
 | --- | --- |
+| 0.7.1 | 适配 Steam Build 26264480、重新生成接口、统一指纹配置、细分版本诊断 |
 | 0.7.0 | 统一按钮与视觉状态、开合/切页/按压反馈、分页禁用、操作提示、减少动态效果、完整README |
 | 0.6.1 | 修复面板错误调用保存退出；加入运输启用/关闭按钮与回归防护 |
 | 0.6.0 | 车库储仓接入、三页面板；该版本存在面板退出问题，应升级 |

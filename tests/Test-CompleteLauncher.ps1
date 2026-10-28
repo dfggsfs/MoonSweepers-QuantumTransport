@@ -1,8 +1,10 @@
-﻿$ErrorActionPreference='Stop'
+﻿param([string]$InteropDir='')
+$ErrorActionPreference='Stop'
 $workspace=Split-Path $PSScriptRoot -Parent
-$bundle=Join-Path $workspace 'dist\QuantumTransport-0.7.0-OneClick'
+$bundle=Join-Path $workspace 'dist\QuantumTransport-0.7.1-OneClick'
 Import-Module (Join-Path $bundle 'scripts\Installer.Common.psm1') -Force -DisableNameChecking
 $gameSource='C:\Program Files (x86)\Steam\steamapps\common\Moon Sweepers'
+if (-not $InteropDir) { $InteropDir=Join-Path $gameSource 'Lustral\interop' }
 $temp=[IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\')
 $private=Join-Path $temp ('QuantumLauncherTests-'+[Guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($private)|Out-Null
@@ -34,8 +36,8 @@ try {
     foreach($relative in @('MoonSweepers.exe','GameAssembly.dll','MoonSweepers_Data\il2cpp_data\Metadata\global-metadata.dat')) {
         Copy-QItem (Join-Path $gameSource $relative) (Get-QPath $game $relative)
     }
-    Copy-QItem (Join-Path $gameSource 'Lustral\interop') (Get-QPath $game 'Lustral\interop')
-    $package=Get-QPath $game 'QuantumTransport-0.7.0-OneClick';Copy-QItem $bundle $package
+    Copy-QItem $InteropDir (Get-QPath $game 'Lustral\interop')
+    $package=Get-QPath $game 'QuantumTransport-0.7.1-OneClick';Copy-QItem $bundle $package
     $profile=Get-QPath $private 'private-player-profile'
     $saves=Get-QPath $profile 'AppData\LocalLow\DragDropGames\MoonSweepers\MoonSessions'
     [IO.Directory]::CreateDirectory($saves)|Out-Null

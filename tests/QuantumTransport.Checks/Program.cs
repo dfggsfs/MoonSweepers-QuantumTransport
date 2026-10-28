@@ -254,6 +254,7 @@ for (int trial = 0; trial < 2000; trial++)
     Near(totalAccepted, Math.Min(supply, capacity - stock), "random station repeated polls accept at most original available supply");
 }
 
+CompatibilityChecks.Run(Check);
 CoopChecks.Run(Check,Near,Reject);
 GarageDashboardChecks.Run(Check,Near,Reject);
 DashboardVisualChecks.Run(Check,Near);

@@ -1,6 +1,6 @@
 id = "local.quantumtransport"
 name = "量子传送 / Quantum Transport"
-version = "0.7.0"
+version = "0.7.1"
 assembly = "QuantumTransport.dll"
 description = "Quantum logistics with garage supply, accessible animated native dashboard, host-authoritative co-op and bounded scheduling."
 

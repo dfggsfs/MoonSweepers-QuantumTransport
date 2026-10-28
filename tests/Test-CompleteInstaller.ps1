@@ -1,4 +1,4 @@
-﻿param([string]$Bundle=(Join-Path (Split-Path $PSScriptRoot -Parent) 'dist\QuantumTransport-0.7.0-OneClick'), [switch]$ReuseVerifiedInterop)
+﻿param([string]$Bundle=(Join-Path (Split-Path $PSScriptRoot -Parent) 'dist\QuantumTransport-0.7.1-OneClick'), [switch]$ReuseVerifiedInterop)
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version 2.0
 $workspace=Split-Path $PSScriptRoot -Parent
@@ -37,7 +37,7 @@ function Fixture([string]$Name) {
     foreach($relative in @('MoonSweepers.exe','GameAssembly.dll','MoonSweepers_Data\globalgamemanagers','MoonSweepers_Data\globalgamemanagers.assets','MoonSweepers_Data\app.info','MoonSweepers_Data\il2cpp_data\Metadata\global-metadata.dat')) {
         Copy-QItem (Join-Path $gameSource $relative) (Get-QPath $root $relative)
     }
-    $package=Get-QPath $root 'QuantumTransport-0.7.0-OneClick'
+    $package=Get-QPath $root 'QuantumTransport-0.7.1-OneClick'
     Copy-QItem $Bundle $package
     $log=Get-QPath $package 'logs\test'
     [IO.Directory]::CreateDirectory($log)|Out-Null
@@ -84,6 +84,13 @@ try {
     Assert-QGame $fresh.root $manifest
     Assert-QLoaderCompatibility $fresh.root $manifest
     Check $true 'game fingerprints and special-character directory accepted'
+    $assemblyPath=Get-QPath $fresh.root 'GameAssembly.dll'
+    $assemblyBytes=[IO.File]::ReadAllBytes($assemblyPath)
+    [IO.File]::Delete($assemblyPath)
+    Reject {Assert-QGame $fresh.root $manifest} 'missing game assembly has a specific missing-file message' '游戏文件缺失'
+    [IO.File]::WriteAllText($assemblyPath,'unsupported build fixture')
+    Reject {Assert-QGame $fresh.root $manifest} 'unknown build is rejected with actual and expected hashes' '实际 SHA256'
+    [IO.File]::WriteAllBytes($assemblyPath,$assemblyBytes)
     $tamper=Get-QPath $fresh.package 'payload\Mods\local.quantumtransport\QuantumTransport.dll'
     $original=[IO.File]::ReadAllBytes($tamper)
     [IO.File]::WriteAllBytes($tamper,[byte[]](1,2,3))
@@ -97,7 +104,7 @@ try {
     $meta=Get-QPath $fresh.root 'MoonSweepers_Data\il2cpp_data\Metadata\global-metadata.dat'
     $metaBytes=[IO.File]::ReadAllBytes($meta)
     [IO.File]::WriteAllText($meta,'different game version')
-    Reject {Assert-QGame $fresh.root $manifest} 'unsupported game version rejected'
+    Reject {Assert-QGame $fresh.root $manifest} 'unsupported game metadata rejected distinctly from missing files' '指纹不匹配'
     [IO.File]::WriteAllBytes($meta,$metaBytes)
 
     $shell=Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
@@ -122,6 +129,9 @@ try {
     Check (-not (Test-Path -LiteralPath (Get-QPath $fresh.root 'Mods\local.quantumtransport\old-plugin.bin'))) 'fresh Mod contains declared files only'
     $cache=Get-QPath $fresh.root 'Lustral\interop\interop.json'
     $cacheText=[IO.File]::ReadAllText($cache)
+    $staleCache=$cacheText.Replace($manifest.interop.GameAssemblyHash,'705b11ce64a803e1ff396418db440649').Replace($manifest.interop.MetadataHash,'05b586e0de617989339d2635dc64830f')
+    [IO.File]::WriteAllText($cache,$staleCache)
+    Check (-not (Test-QInterop (Get-QPath $fresh.root 'Lustral\interop') $manifest)) 'previous Build 26203101 interop cache cannot be reused for Build 26264480'
     [IO.File]::WriteAllText($cache,$cacheText.Replace('"Unstripped": true','"Unstripped": false'))
     Check (-not (Test-QInterop (Get-QPath $fresh.root 'Lustral\interop') $manifest)) 'missing unstripping is not treated as successful install'
     [IO.File]::WriteAllText($cache,$cacheText)
@@ -214,6 +224,9 @@ finally {
     $success=$completed -and @($checks|Where-Object {-not $_.passed}).Count -eq 0
     $report=[pscustomobject]@{success=$success;error=$testError;reusedPreviouslyVerifiedInterop=[bool]$ReuseVerifiedInterop;checks=$checks.ToArray();scope='Windows PowerShell 5.1 isolated game-file fixture; native generation evidence recorded separately when using focused replay; no game execution or gameplay validation.'}
     Write-QJson $report (Join-Path $workspace 'artifacts\complete-installer-tests.json')
+    if ($success -and -not $ReuseVerifiedInterop) {
+        Write-QJson ([pscustomobject]@{success=$true;gameBuildId=$manifest.gameBuildId;interop=$manifest.interop;checks=@($checks|Where-Object {$_.label -in @('clean installation succeeds with real bundled generator and runtime','fresh interfaces generated locally without executing game','generated unstripped interop identity and required CLR assemblies validated')});scope='Real bundled loader/runtime clean installation and full interface generation for this build in copied game-file fixtures; existing verified Unity library download cache reused. Game not executed.'}) (Join-Path $workspace 'artifacts\complete-installer-native-generation.json')
+    }
     foreach($file in Get-ChildItem -LiteralPath $private -Filter 'generator.*.log' -File -Recurse) {
         Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $workspace ('artifacts\complete-installer-' + $file.Name)) -Force
     }

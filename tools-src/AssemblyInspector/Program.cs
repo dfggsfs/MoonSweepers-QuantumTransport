@@ -4,7 +4,14 @@ using System.Text.Json;
 using QuantumTransport.Core;
 
 string game = @"C:\Program Files (x86)\Steam\steamapps\common\Moon Sweepers";
-string[] dirs = [Path.Combine(game, "Lustral/interop"), Path.Combine(game, "Lustral/core")];
+string? interop = null;
+while (args.Length >= 2 && args[0] is "--game" or "--interop")
+{
+    if (args[0] == "--game") game = Path.GetFullPath(args[1]);
+    else interop = Path.GetFullPath(args[1]);
+    args = args.Skip(2).ToArray();
+}
+string[] dirs = [interop ?? Path.Combine(game, "Lustral/interop"), Path.Combine(game, "Lustral/core")];
 AssemblyLoadContext.Default.Resolving += (_, name) =>
 {
     foreach (string dir in dirs)
@@ -30,6 +37,18 @@ if (args.Length > 0 && args[0] == "--verify")
         if (!passed) failures++;
     }
     Check(BuildCompatibility.IsSupported(game, out string reason), "supported game fingerprint: " + reason);
+    using var compatibility = JsonDocument.Parse(File.ReadAllText("distribution/game-compatibility.json"));
+    var profile = compatibility.RootElement;
+    Check(BuildCompatibility.ExpectedSteamBuild == profile.GetProperty("steamBuildId").GetString() &&
+        profile.GetProperty("gameFiles").EnumerateArray().All(f => f.GetProperty("sha256").GetString() ==
+            (f.GetProperty("path").GetString() == "GameAssembly.dll" ? BuildCompatibility.ExpectedAssemblyHash : BuildCompatibility.ExpectedMetadataHash)),
+        "embedded runtime fingerprints match the shared installer/diagnostic profile");
+    using var interopManifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(dirs[0], "interop.json")));
+    Check(profile.GetProperty("interop").EnumerateObject().All(p => p.Value.ToString() == interopManifest.RootElement.GetProperty(p.Name).ToString()) &&
+        interopManifest.RootElement.GetProperty("Unstripped").GetBoolean(), "inspected interfaces were generated for this exact build and include restored Unity APIs");
+    using (var metadata = new BinaryReader(File.OpenRead(Path.Combine(game, "MoonSweepers_Data/il2cpp_data/Metadata/global-metadata.dat"))))
+        Check(metadata.ReadUInt32() == 0xFAB11BAF && metadata.ReadInt32() == BuildCompatibility.ExpectedMetadataVersion,
+            "actual metadata header matches the supported format");
     var world = assembly.GetType("Il2CppMoonCleaners.MoonWorld", true)!;
     var state = assembly.GetType("Il2CppMoonCleaners.MoonProductionState", true)!;
     var snapshot = assembly.GetType("Il2CppMoonCleaners.MoonVehicleStorageSnapshot", true)!;

@@ -120,7 +120,7 @@ function Assert-QBundle {
     param([string]$PackageRoot)
     $file = Get-QPath $PackageRoot 'bundle-manifest.json'
     $manifest = [IO.File]::ReadAllText($file) | ConvertFrom-Json
-    if ($manifest.format -ne 1 -or $manifest.modVersion -ne '0.7.0' -or
+    if ($manifest.format -ne 1 -or $manifest.modVersion -ne '0.7.1' -or
         $manifest.loaderVersion -ne '0.1.0' -or $manifest.platform -ne 'win-x64') { throw '不支持此安装包格式或版本。' }
     $seen = @{}
     foreach ($entry in $manifest.files) {
@@ -147,9 +147,20 @@ function Assert-QGame {
     if (Get-Process -Name MoonSweepers -ErrorAction SilentlyContinue) { throw '请先正常保存并关闭 Moon Sweepers；安装程序不会强制关闭游戏。' }
     foreach ($entry in $Manifest.gameFiles) {
         $path = Get-QPath $GameDir $entry.path
-        if (-not (Test-Path -LiteralPath $path -PathType Leaf) -or
-            (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ne $entry.sha256) {
-            throw "游戏版本不匹配或文件缺失：$($entry.path)。本包仅适配 Moon Sweepers 1.0.4 / Steam Build 26203101。"
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+            throw "游戏文件缺失：$($entry.path)。请在 Steam 校验游戏文件；本包适配 Steam Build $($Manifest.gameBuildId)。"
+        }
+        $actual = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($actual -ne $entry.sha256) {
+            $build = '未读取到'
+            $steamApps = Split-Path -Parent (Split-Path -Parent $GameDir)
+            $acfPath = Join-Path $steamApps 'appmanifest_5335510.acf'
+            if (Test-Path -LiteralPath $acfPath -PathType Leaf) {
+                try {
+                    if ([IO.File]::ReadAllText($acfPath) -match '(?im)^\s*"buildid"\s+"(\d+)"') { $build = $Matches[1] }
+                } catch { $build = '无法读取' }
+            }
+            throw ("游戏文件指纹不匹配：{0}。`n支持 Steam Build：{1}；本机 Steam 记录：{2}（仅供参考）。`n期望 SHA256：{3}`n实际 SHA256：{4}`n请运行本包的 诊断游戏版本.cmd 并提供桌面 JSON；不要修改清单跳过检查。" -f $entry.path,$Manifest.gameBuildId,$build,$entry.sha256,$actual)
         }
     }
 }

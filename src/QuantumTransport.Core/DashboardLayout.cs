@@ -72,7 +72,7 @@ public static class DashboardLayout
         Box("logo",24,26,46,46,Cyan); Text("logo.text","QT",32,35,38,30,23,Background,true);
         Text("title","量子传送",82,34,92,32,20,White,true);
         Text("subtitle","QUANTUM TRANSPORT",24,86,142,18,10,Muted);
-        Text("version","v0.7.0  /  月球物流",24,108,142,18,11,Muted);
+        Text("version","v0.7.1  /  月球物流",24,108,142,18,11,Muted);
         Box("status.badge",690,26,246,39,Card);
         Text("status",d.WorldReady?StateLabel(d.State):"等待进入世界",704,34,218,26,14,d.Error!=null?Orange:Cyan,true);
         Button("close","关闭面板  ×",956,26,138,40,"close",hint:"关闭此面板，返回原界面；不会退出游戏。");

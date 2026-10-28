@@ -29,6 +29,8 @@ files = {
     'README.md': root/'README.md',
     '开始测试.md': root / 'distribution/开始测试.md',
     'default-config.toml': root / 'distribution/default-config.toml',
+    'game-compatibility.json': root / 'distribution/game-compatibility.json',
+    f'docs/compatibility-{version}.md': root / f'docs/compatibility-{version}.md',
     'offline-core-tests.txt': root / 'artifacts/offline-core-tests.txt',
     'offline-interface-check.json': root / 'artifacts/offline-interface-check.json',
     'production-stall-0.2.1.md': root / 'artifacts/production-stall-0.2.1.md',
@@ -45,7 +47,7 @@ files = {
 }
 for name in ['QuantumTransport.dll', 'QuantumTransport.Core.dll']:
     files[f'Mods/local.quantumtransport/{name}'] = root / 'src/QuantumTransport.Mod/bin/Release/net10.0' / name
-for name in ['Preflight.ps1', 'Install.ps1', 'Set-Enabled.ps1', 'Collect-Diagnostics.ps1']:
+for name in ['Preflight.ps1', 'Install.ps1', 'Set-Enabled.ps1', 'Collect-Diagnostics.ps1', 'Inspect-GameVersion.ps1']:
     files[f'scripts/{name}'] = root / 'scripts' / name
 files['scripts/Installer.Common.psm1'] = root/'scripts/complete/Installer.Common.psm1'
 for relative, source in files.items():
@@ -60,6 +62,7 @@ commands = {
     '启用量子传送.cmd': 'Set-Enabled.ps1 -Enabled true',
     '禁用量子传送.cmd': 'Set-Enabled.ps1 -Enabled false',
     '收集日志.cmd': 'Collect-Diagnostics.ps1',
+    '诊断游戏版本.cmd': 'Inspect-GameVersion.ps1',
 }
 for name, command in commands.items():
     script, _, arguments = command.partition(' ')

@@ -1,0 +1,22 @@
+{
+  "game": "Moon Sweepers",
+  "steamBuildId": "26264480",
+  "metadataVersion": 108,
+  "gameFiles": [
+    {
+      "path": "GameAssembly.dll",
+      "sha256": "c5294c11e1ffb4eda7b2f003aa1e6beaa01f59989bedee2694804b031d6d84ba"
+    },
+    {
+      "path": "MoonSweepers_Data/il2cpp_data/Metadata/global-metadata.dat",
+      "sha256": "e685e404560264cb17c491ebcf515a4c56b366871c9994a5bc35bcdbdb0f17d5"
+    }
+  ],
+  "interop": {
+    "Format": 7,
+    "UnityVersion": "6000.6.0f1",
+    "Il2CppInteropVersion": "2.0.0-beta.8",
+    "GameAssemblyHash": "98727ca61a4e0321fcff9ca49695d155",
+    "MetadataHash": "ce48b66c4ce90d81b4f1b6362f17ecdf"
+  }
+}

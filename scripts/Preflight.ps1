@@ -19,19 +19,18 @@ foreach ($file in $manifest.files) {
     $hashMatches = $exists -and ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -eq $file.sha256)
     Add-Check "Package: $($file.path)" $hashMatches
 }
-$expected = @{
-    'GameAssembly.dll' = '82b2e7f2a049c332e836fd9b492ce2fa16c1600de1d276b4b79742daf15adea0'
-    'MoonSweepers_Data\il2cpp_data\Metadata\global-metadata.dat' = 'f5ac72f32a8d9f5992ec793265b6dec0092a7358c342194fd0afb4e193119c1b'
-}
-foreach ($entry in $expected.GetEnumerator()) {
-    $path = Join-Path $GameDir $entry.Key
+$compatibility = Get-Content -LiteralPath (Join-Path $PackageRoot 'game-compatibility.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+foreach ($entry in $compatibility.gameFiles) {
+    $path = Join-Path $GameDir $entry.path
     $exists = Test-Path -LiteralPath $path -PathType Leaf
-    Add-Check "Supported game: $($entry.Key)" ($exists -and ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -eq $entry.Value))
+    Add-Check "Supported game: $($entry.path) / Steam Build $($compatibility.steamBuildId)" ($exists -and ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -eq $entry.sha256))
 }
 foreach ($relative in @('MoonSweepers.exe','winhttp.dll','Lustral\core\Lustral.Api.dll','Lustral\core\0Harmony.dll','Lustral\core\Il2CppInterop.Runtime.dll','Lustral\interop\Assembly-CSharp.dll','Lustral\interop\Il2Cppmscorlib.dll','Lustral\interop\Il2Cppcom.rlabrecque.steamworks.net.dll',
     'Lustral\interop\UnityEngine.UI.dll','Lustral\interop\UnityEngine.UIModule.dll','Lustral\interop\Unity.TextMeshPro.dll')) {
     Add-Check "Prerequisite: $relative" (Test-Path -LiteralPath (Join-Path $GameDir $relative) -PathType Leaf)
 }
+Import-Module (Join-Path $PSScriptRoot 'Installer.Common.psm1') -Force -DisableNameChecking
+Add-Check 'Generated interfaces match this game build' (Test-QInterop (Join-Path $GameDir 'Lustral/interop') $compatibility)
 if (-not $PackageOnly) {
     foreach ($relative in @('Mods\local.quantumtransport\QuantumTransport.dll','Mods\local.quantumtransport\QuantumTransport.Core.dll','Mods\local.quantumtransport\mod.toml')) {
         $path = Join-Path $GameDir $relative

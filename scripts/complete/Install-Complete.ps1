@@ -10,7 +10,7 @@ if(-not $PlayerSaveRoot) { $PlayerSaveRoot=Join-Path $env:USERPROFILE 'AppData\L
 if(-not $PlayerSid) { $PlayerSid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value }
 try {
     Import-Module (Join-Path $PSScriptRoot 'Installer.Common.psm1') -Force -DisableNameChecking
-    Write-Host '量子传送 0.7.0 完整安装（含长路径备份修复）：加载器 + .NET 运行时 + Mod' -ForegroundColor Cyan
+    Write-Host '量子传送 0.7.1 完整安装（含长路径备份修复）：加载器 + .NET 运行时 + Mod' -ForegroundColor Cyan
     Write-Host ('游戏目录：' + $game)
     Write-Host '正在检查安装包和游戏版本。'
     $manifest = Assert-QBundle $package

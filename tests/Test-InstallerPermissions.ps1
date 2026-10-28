@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference='Stop'
 $workspace=Split-Path $PSScriptRoot -Parent
-Import-Module (Join-Path $workspace 'dist\QuantumTransport-0.7.0-OneClick\scripts\Installer.Common.psm1') -Force -DisableNameChecking
+Import-Module (Join-Path $workspace 'dist\QuantumTransport-0.7.1-OneClick\scripts\Installer.Common.psm1') -Force -DisableNameChecking
 $temp=[IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\')
 $root=Join-Path $temp ('QuantumPermissionTests-'+[Guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory((Join-Path $root 'Lustral\config'))|Out-Null

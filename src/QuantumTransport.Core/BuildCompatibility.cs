@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace QuantumTransport.Core;
 
@@ -6,8 +7,23 @@ public enum DiagnosticLevel { Off, Error, Warn, Info, Debug }
 
 public static class BuildCompatibility
 {
-    public const string ExpectedAssemblyHash = "82b2e7f2a049c332e836fd9b492ce2fa16c1600de1d276b4b79742daf15adea0";
-    public const string ExpectedMetadataHash = "f5ac72f32a8d9f5992ec793265b6dec0092a7358c342194fd0afb4e193119c1b";
+    public static string ExpectedSteamBuild { get; }
+    public static int ExpectedMetadataVersion { get; }
+    public static string ExpectedAssemblyHash { get; }
+    public static string ExpectedMetadataHash { get; }
+
+    static BuildCompatibility()
+    {
+        using var stream = typeof(BuildCompatibility).Assembly.GetManifestResourceStream("QuantumTransport.GameCompatibility.json")
+            ?? throw new InvalidOperationException("Missing embedded game compatibility profile");
+        using var document = JsonDocument.Parse(stream);
+        var profile = document.RootElement;
+        ExpectedSteamBuild = profile.GetProperty("steamBuildId").GetString()!;
+        ExpectedMetadataVersion = profile.GetProperty("metadataVersion").GetInt32();
+        var files = profile.GetProperty("gameFiles").EnumerateArray().ToArray();
+        ExpectedAssemblyHash = files.Single(f => f.GetProperty("path").GetString() == "GameAssembly.dll").GetProperty("sha256").GetString()!;
+        ExpectedMetadataHash = files.Single(f => f.GetProperty("path").GetString() == "MoonSweepers_Data/il2cpp_data/Metadata/global-metadata.dat").GetProperty("sha256").GetString()!;
+    }
 
     public static string HashFile(string path)
     {
@@ -21,11 +37,17 @@ public static class BuildCompatibility
         {
             string assembly = Path.Combine(gameDirectory, "GameAssembly.dll");
             string metadata = Path.Combine(gameDirectory, "MoonSweepers_Data/il2cpp_data/Metadata/global-metadata.dat");
-            if (!File.Exists(assembly) || !File.Exists(metadata))
-            { reason = "找不到游戏核心文件或元数据。"; return false; }
-            if (HashFile(assembly) != ExpectedAssemblyHash || HashFile(metadata) != ExpectedMetadataHash)
-            { reason = "游戏文件与本次支持的 Steam Build 26203101 不一致。量子运输未启用，请先更新适配。"; return false; }
-            reason = "Steam Build 26203101 / metadata v108 指纹匹配。";
+            foreach (var (path, expected) in new[] { (assembly, ExpectedAssemblyHash), (metadata, ExpectedMetadataHash) })
+            {
+                if (!File.Exists(path)) { reason = "游戏文件缺失：" + Path.GetFileName(path); return false; }
+                string actual = HashFile(path);
+                if (actual != expected)
+                {
+                    reason = $"游戏文件指纹不匹配：{Path.GetFileName(path)}；期望 Steam Build {ExpectedSteamBuild}，SHA256={expected}，实际 SHA256={actual}。量子运输未启用。";
+                    return false;
+                }
+            }
+            reason = $"Steam Build {ExpectedSteamBuild} / metadata v{ExpectedMetadataVersion} 指纹匹配。";
             return true;
         }
         catch (Exception error) { reason = "游戏文件检查失败：" + error.Message; return false; }
