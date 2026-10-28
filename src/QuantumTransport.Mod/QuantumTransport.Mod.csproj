@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>QuantumTransport</AssemblyName>
+    <Version>0.7.0</Version>
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Moon Sweepers</GameDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../QuantumTransport.Core/QuantumTransport.Core.csproj" />
+    <Reference Include="Lustral.Api"><HintPath>$(GameDir)/Lustral/core/Lustral.Api.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(GameDir)/Lustral/core/0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Il2CppInterop.Runtime"><HintPath>$(GameDir)/Lustral/core/Il2CppInterop.Runtime.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Il2CppInterop.Common"><HintPath>$(GameDir)/Lustral/core/Il2CppInterop.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="$(GameDir)/Lustral/interop/*.dll"><Private>false</Private></Reference>
+  </ItemGroup>
+</Project>

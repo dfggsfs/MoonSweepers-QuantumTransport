@@ -1,0 +1,29 @@
+﻿# Quantum Transport 0.7.0: authoritative co-op handoff and bounded scheduling.
+# Ctrl+F8: enable/disable. Ctrl+F9: Info/Debug. Ctrl+F10: status snapshot.
+enabled = true
+log_level = "Info"
+summary_interval_seconds = 15
+poll_interval_milliseconds = 100
+run_native_checks = false
+dust_distribution = "RecipeBalanced"
+chamber_dust_priority = 0
+press_dust_priority = 0
+press_dust_buffer_kilograms = 1.0
+packager_dust_reserve_kilograms = 0.0
+collect_player_dust = true
+collect_vehicle_dust = true
+collect_garage_dust = true
+collect_robot_dust = true
+deliver_stone = true
+enable_coop = true
+collect_loose_capsules = true
+max_sources_per_tick = 128
+max_receiver_samples_per_tick = 128
+max_transfers_per_tick = 128
+tick_budget_milliseconds = 4.0
+catalog_refresh_milliseconds = 1000
+network_sync_milliseconds = 250
+max_client_capsules_in_flight = 8
+client_capsules_per_tick = 1
+enable_dashboard = true
+reduce_dashboard_motion = false
